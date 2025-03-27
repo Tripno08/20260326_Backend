@@ -37,15 +37,15 @@ export class AuthService {
 
   async login(user: any) {
     const payload = {
-      email: user.email,
       sub: user.id,
-      roles: user.roles,
+      email: user.email,
+      cargo: user.cargo,
     };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload),
       this.jwtService.signAsync(payload, {
-        expiresIn: this.config.get('JWT_REFRESH_EXPIRATION', '7d'),
+        expiresIn: this.config.get('JWT_REFRESH_EXPIRATION', 7 * 24 * 60 * 60),
       }),
     ]);
 
@@ -53,7 +53,7 @@ export class AuthService {
     await this.redis.set(
       `refresh_token:${user.id}`,
       refreshToken,
-      this.config.get('JWT_REFRESH_EXPIRATION', '7d'),
+      this.config.get('JWT_REFRESH_EXPIRATION', 7 * 24 * 60 * 60),
     );
 
     return {
@@ -63,7 +63,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         nome: user.nome,
-        roles: user.roles,
+        cargo: user.cargo,
       },
     };
   }
@@ -88,7 +88,7 @@ export class AuthService {
       const newPayload = {
         email: user.email,
         sub: user.id,
-        roles: user.roles,
+        cargo: user.cargo,
       };
 
       const newAccessToken = await this.jwtService.signAsync(newPayload);
@@ -112,8 +112,8 @@ export class AuthService {
       include: { credenciais: true },
     });
 
-    if (!user?.credenciais?.mfaSecret) {
-      return false;
+    if (!user?.credenciais) {
+      throw new UnauthorizedException('Credenciais não encontradas');
     }
 
     // Implementar validação do código MFA

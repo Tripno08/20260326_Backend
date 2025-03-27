@@ -13,6 +13,8 @@ describe('SecurityController (e2e)', () => {
 
   beforeAll(async () => {
     prisma = app.get<PrismaService>(PrismaService);
+    // Limpar dados de teste
+    await prisma.customAuditoria.deleteMany();
   });
 
   beforeEach(async () => {

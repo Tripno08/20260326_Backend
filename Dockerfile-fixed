@@ -1,0 +1,24 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# Instalando todas as dependências, incluindo as de desenvolvimento
+RUN npm ci
+
+# Copiando todos os arquivos
+COPY . .
+
+# Executando a build
+RUN npm run build
+
+# Gerando o cliente Prisma
+RUN npx prisma generate
+
+# Removendo as dependências de desenvolvimento após a build
+RUN npm prune --production
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start:prod"] 

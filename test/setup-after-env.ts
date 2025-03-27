@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
+import { Test } from '@nestjs/testing';
+import { PrismaService } from '../src/shared/prisma/prisma.service';
+import { RedisService } from '../src/shared/redis/redis.service';
 
 export type Context = {
   prisma: PrismaClient;
@@ -66,4 +69,23 @@ jest.mock('winston', () => {
       File: jest.fn(),
     },
   };
+});
+
+declare global {
+  namespace NodeJS {
+    interface Global {
+      prisma: DeepMockProxy<PrismaService>;
+      redis: DeepMockProxy<RedisService>;
+    }
+  }
+}
+
+beforeAll(async () => {
+  global.prisma = mockDeep<PrismaService>();
+  global.redis = mockDeep<RedisService>();
+});
+
+afterAll(async () => {
+  await global.prisma.$disconnect();
+  await global.redis.disconnect();
 }); 

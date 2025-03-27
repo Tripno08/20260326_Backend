@@ -70,29 +70,41 @@ describe('IntegrationsService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all integrations', async () => {
-      const expectedResult = [
-        {
-          id: 'test-id-1',
-          nome: 'Integration 1',
-          plataforma: Plataforma.GOOGLE_CLASSROOM,
-          ativo: true,
-        },
-        {
-          id: 'test-id-2',
-          nome: 'Integration 2',
-          plataforma: Plataforma.MICROSOFT_TEAMS,
-          ativo: true,
-        },
-      ];
-
-      mockPrismaService.integracaoPlataforma.findMany.mockResolvedValue(expectedResult);
-
-      const result = await service.findAll({ ativo: true });
-
-      expect(result).toEqual(expectedResult);
+    it('should find all integrations with filter', async () => {
+      const integration1 = {
+        id: 'test-id-1',
+        nome: 'Integration 1',
+        plataforma: Plataforma.GOOGLE_CLASSROOM,
+        ativo: true,
+        clientId: 'client1',
+        clientSecret: 'secret1',
+        redirectUri: 'https://example.com/callback',
+        escopos: 'scope1 scope2',
+        criadoEm: new Date(),
+        atualizadoEm: new Date(),
+      };
+      
+      const integration2 = {
+        id: 'test-id-2',
+        nome: 'Integration 2',
+        plataforma: Plataforma.MICROSOFT_TEAMS,
+        ativo: true,
+        clientId: 'client2',
+        clientSecret: 'secret2',
+        redirectUri: 'https://example.com/callback2',
+        escopos: 'scope1 scope2',
+        criadoEm: new Date(),
+        atualizadoEm: new Date(),
+      };
+      
+      mockPrismaService.integracaoPlataforma.findMany.mockResolvedValue([integration1, integration2]);
+      
+      const result = await service.findAll(true);
+      
+      expect(result).toEqual([integration1, integration2]);
       expect(mockPrismaService.integracaoPlataforma.findMany).toHaveBeenCalledWith({
         where: { ativo: true },
+        orderBy: { nome: 'asc' },
       });
     });
   });
@@ -201,9 +213,9 @@ describe('IntegrationsService', () => {
 
       const result = await service.authorize('test-id');
 
-      expect(result).toHaveProperty('url');
-      expect(result.url).toContain('test-client-id');
-      expect(result.url).toContain('https://test.com/callback');
+      expect(result).toHaveProperty('authorizationUrl');
+      expect(result.authorizationUrl).toContain('test-client-id');
+      expect(result.authorizationUrl).toContain('https://test.com/callback');
     });
 
     it('should throw BadRequestException for inactive integration', async () => {

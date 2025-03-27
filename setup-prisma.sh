@@ -8,16 +8,24 @@ if ! docker info > /dev/null 2>&1; then
   exit 1
 fi
 
-# Verificar se o banco de dados está em execução
-if ! docker compose ps postgres | grep -q "healthy"; then
-  echo "Banco de dados não está em execução, iniciando..."
-  docker compose up -d postgres
-  echo "Aguardando o banco de dados ficar disponível..."
-  sleep 10
+# Verifica se o container MySQL está saudável
+if ! docker compose ps mysql | grep -q "healthy"; then
+  echo "Iniciando container MySQL..."
+  docker compose up -d mysql
 fi
 
-# Executar prisma generate dentro do container
-echo "Gerando código Prisma..."
-docker compose exec app npx prisma generate
+# Aguarda o MySQL estar pronto
+echo "Aguardando MySQL estar pronto..."
+while ! docker compose exec mysql mysqladmin ping -h localhost -u root -proot --silent; do
+  sleep 1
+done
+
+# Gera o cliente Prisma
+echo "Gerando cliente Prisma..."
+npx prisma generate
+
+# Executa as migrações
+echo "Executando migrações..."
+npx prisma migrate dev
 
 echo "Schema Prisma gerado com sucesso!" 

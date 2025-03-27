@@ -1,153 +1,89 @@
-# Resumo do Projeto Innerview Backend
+# Resumo do Projeto Innerview
 
 ## Visão Geral
 
-O Innerview Backend é uma plataforma robusta e escalável desenvolvida com NestJS, focada em fornecer uma experiência educacional integrada e personalizada. O projeto implementa recursos avançados de segurança, performance, integração e análise para atender às necessidades específicas do ambiente educacional.
-
-## Principais Recursos
-
-### 1. Segurança
-- Autenticação multi-fator
-- Controle de acesso baseado em papéis (RBAC)
-- Proteção contra vulnerabilidades comuns
-- Criptografia de dados sensíveis
-- Monitoramento de segurança
-
-### 2. Integrações Educacionais
-- Learning Tools Interoperability (LTI)
-- Microsoft Education
-- Google Classroom
-- APIs REST
-- Webhooks
-
-### 3. IA e Análise Preditiva
-- Recomendações personalizadas
-- Análise de estilo de aprendizagem
-- Previsão de desempenho
-- Detecção de riscos
-- Insights acionáveis
-- Processamento de linguagem natural
-
-### 4. Relatórios e Comunicação
-- Geração de relatórios personalizados
-- Comunicação com famílias
-- Sistema de comentários
-- Documentação de intervenções
-- Compartilhamento de recursos
-- Análise de engajamento
-
-### 5. Suporte Mobile e de Campo
-- Design responsivo
-- Funcionalidade offline
-- Ferramentas de campo
-- Otimização de performance
-- Segurança mobile
+O Innerview é uma plataforma educacional que visa facilitar o acompanhamento e desenvolvimento de estudantes, permitindo que professores e especialistas realizem avaliações e intervenções personalizadas.
 
 ## Arquitetura
 
-### 1. Estrutura do Projeto
-```
-src/
-├── core/           # Módulos principais
-├── shared/         # Recursos compartilhados
-├── integrations/   # Integrações externas
-├── security/       # Recursos de segurança
-└── analysis/       # Recursos de análise
-```
+### Backend (NestJS)
 
-### 2. Tecnologias Principais
-- NestJS como framework principal
-- TypeScript para tipagem estática
-- Prisma como ORM
-- Redis para cache
-- PostgreSQL como banco de dados principal
-- JWT para autenticação
-- Swagger para documentação
+- **Framework**: NestJS
+- **Linguagem**: TypeScript
+- **Banco de Dados**: MySQL
+- **ORM**: Prisma
+- **Cache**: Redis
+- **Autenticação**: JWT
+- **Documentação**: Swagger/OpenAPI
 
-### 3. Padrões de Design
-- Clean Architecture
-- SOLID Principles
-- Repository Pattern
-- Service Pattern
-- Factory Pattern
-- Observer Pattern
+### Frontend (React)
 
-## Métricas e Monitoramento
+- **Framework**: React
+- **Linguagem**: TypeScript
+- **UI Framework**: Material-UI
+- **Gerenciamento de Estado**: Redux Toolkit
+- **Roteamento**: React Router
+- **Formulários**: React Hook Form
 
-### 1. Performance
-- Tempo médio de resposta: < 200ms
-- Taxa de cache hit: > 80%
-- Uso de CPU: < 70%
-- Uso de memória: < 80%
+## Funcionalidades Principais
 
-### 2. Qualidade
-- Cobertura de testes: > 90%
-- Taxa de bugs críticos: < 0.1%
-- Tempo médio de resolução: < 24h
-- Satisfação do usuário: > 4.5/5
+1. **Gestão de Usuários**
+   - Cadastro e autenticação
+   - Diferentes níveis de acesso (Admin, Professor, Especialista, etc.)
+   - Perfis personalizados
 
-### 3. Segurança
-- Vulnerabilidades críticas: 0
-- Taxa de tentativas de invasão bloqueadas: > 99%
-- Tempo médio de detecção de ameaças: < 1h
-- Conformidade com LGPD/GDPR: 100%
+2. **Gestão de Estudantes**
+   - Cadastro de estudantes
+   - Histórico acadêmico
+   - Acompanhamento de progresso
+
+3. **Avaliações**
+   - Criação de avaliações personalizadas
+   - Múltiplos tipos de questões
+   - Análise de resultados
+
+4. **Intervenções**
+   - Planejamento de intervenções
+   - Acompanhamento de progresso
+   - Relatórios de evolução
+
+5. **Relatórios**
+   - Geração de relatórios personalizados
+   - Exportação em diferentes formatos
+   - Análise de dados
 
 ## Próximos Passos
 
-### 1. Curto Prazo
-- Implementação de testes de integração adicionais
-- Otimização de queries do banco de dados
-- Melhoria na documentação da API
-- Implementação de monitoramento em tempo real
+1. **Melhorias de Performance**
+   - Implementação de cache
+   - Otimização de consultas
+   - Compressão de dados
 
-### 2. Médio Prazo
-- Expansão das integrações educacionais
-- Implementação de recursos avançados de IA
-- Melhoria na experiência mobile
-- Implementação de análise preditiva avançada
+2. **Novas Funcionalidades**
+   - Integração com sistemas externos
+   - Análise preditiva
+   - Gamificação
 
-### 3. Longo Prazo
-- Escalabilidade horizontal
-- Implementação de microserviços
-- Expansão internacional
-- Integração com novas tecnologias educacionais
+3. **Segurança**
+   - Implementação de 2FA
+   - Auditoria de ações
+   - Criptografia de dados sensíveis
+
+4. **UX/UI**
+   - Design responsivo
+   - Temas personalizáveis
+   - Acessibilidade
 
 ## Contribuição
 
-### 1. Como Contribuir
-- Seguir as diretrizes de código
-- Escrever testes unitários e de integração
-- Documentar novas funcionalidades
-- Participar de code reviews
+Para contribuir com o projeto:
 
-### 2. Processo de Desenvolvimento
-- Branching strategy: Git Flow
-- CI/CD com GitHub Actions
-- Code review obrigatório
-- Deploy automatizado
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature
+3. Faça commit das mudanças
+4. Push para a branch
+5. Abra um Pull Request
 
-### 3. Qualidade de Código
-- Linting com ESLint
-- Formatação com Prettier
-- Análise estática com SonarQube
-- Testes automatizados
+## Licença
 
-## Suporte
-
-### 1. Documentação
-- API Documentation (Swagger)
-- Guias de desenvolvimento
-- Manuais de usuário
-- FAQs
-
-### 2. Comunidade
-- Fórum de discussão
-- Canal de suporte
-- Blog técnico
-- Newsletter
-
-### 3. Treinamento
-- Workshops
-- Tutoriais
-- Certificações
-- Mentoria 
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes. 

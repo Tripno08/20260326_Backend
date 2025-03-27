@@ -1,41 +1,38 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from './shared/prisma/prisma.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
-import { RolesGuard } from './shared/guards/roles.guard';
-import { PrismaService } from './shared/prisma/prisma.service';
-import { StudentsModule } from './modules/students/students.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { CacheModule } from './modules/cache/cache.module';
+import { RedisModule } from './modules/redis/redis.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { EstudantesModule } from './modules/estudantes/estudantes.module';
 import { InstitutionsModule } from './modules/institutions/institutions.module';
 import { AssessmentsModule } from './modules/assessments/assessments.module';
 import { GoalsModule } from './modules/goals/goals.module';
+import { TestModule } from './modules/test/test.module';
+import { PrismaModule } from './shared/prisma/prisma.module';
+import { PrismaService } from './shared/prisma/prisma.service';
+import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
+import { RolesGuard } from './shared/guards/roles.guard';
+import { throttlerConfig } from './config/cache.config';
 
 @Module({
   imports: [
-    // Configuração de variáveis de ambiente
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // Prisma Module
+    ThrottlerModule.forRoot(throttlerConfig),
     PrismaModule,
-    // Auth Module
+    RedisModule,
+    CacheModule,
     AuthModule,
-    // Users Module
-    UsersModule,
-    // Students Module
-    StudentsModule,
-    // Institutions Module
-    InstitutionsModule,
-    // Assessments Module
+    EstudantesModule,
     AssessmentsModule,
-    // Goals Module
+    InstitutionsModule,
     GoalsModule,
-    // Outros módulos serão importados aqui
+    TestModule,
   ],
   providers: [
-    // Guards globais
     PrismaService,
     {
       provide: APP_GUARD,
@@ -44,6 +41,10 @@ import { GoalsModule } from './modules/goals/goals.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

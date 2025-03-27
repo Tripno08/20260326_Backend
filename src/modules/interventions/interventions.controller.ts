@@ -16,7 +16,8 @@ import { UpdateInterventionDto } from './dto/update-intervention.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { CargoUsuario, Status } from '@prisma/client';
+import { CargoUsuario } from '../../shared/enums/cargo-usuario.enum';
+import { Status } from '@prisma/client';
 
 @ApiTags('Intervenções')
 @ApiBearerAuth()

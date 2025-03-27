@@ -9,23 +9,36 @@ export class TeamsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createTeamDto: CreateTeamDto): Promise<Equipe> {
+    // Converter DTOs para formato compatível com Prisma
+    const { membros, estudantes, ...teamData } = createTeamDto;
+    
     return this.prisma.equipe.create({
       data: {
-        ...createTeamDto,
-        ativo: createTeamDto.ativo ?? true,
+        ...teamData,
+        membros: membros && membros.length > 0 ? {
+          create: membros.map(membro => ({
+            usuario: { connect: { id: membro.usuarioId } },
+            cargo: membro.cargo
+          }))
+        } : undefined,
+        estudantes: estudantes && estudantes.length > 0 ? {
+          create: estudantes.map(estudante => ({
+            estudante: { connect: { id: estudante.estudanteId } }
+          }))
+        } : undefined
       },
       include: {
         membros: {
           include: {
-            usuario: true,
-          },
+            usuario: true
+          }
         },
         estudantes: {
           include: {
-            estudante: true,
-          },
-        },
-      },
+            estudante: true
+          }
+        }
+      }
     });
   }
 

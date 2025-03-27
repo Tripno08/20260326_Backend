@@ -17,7 +17,7 @@ import { CreateProgressDto } from './dto/create-progress.dto';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { RolesGuard } from '../../shared/guards/roles.guard';
 import { Roles } from '../../shared/decorators/roles.decorator';
-import { CargoUsuario } from '@prisma/client';
+import { CargoUsuario } from '../../shared/enums/cargo-usuario.enum';
 
 @ApiTags('Metas')
 @Controller('metas')
@@ -34,6 +34,7 @@ export class GoalsController {
   }
 
   @Get()
+  @Roles(CargoUsuario.PROFESSOR, CargoUsuario.ADMIN)
   @ApiOperation({ summary: 'Listar todas as metas' })
   @ApiResponse({ status: 200, description: 'Lista de metas retornada com sucesso' })
   findAll() {
@@ -41,6 +42,7 @@ export class GoalsController {
   }
 
   @Get(':id')
+  @Roles(CargoUsuario.PROFESSOR, CargoUsuario.ADMIN)
   @ApiOperation({ summary: 'Buscar uma meta específica' })
   @ApiResponse({ status: 200, description: 'Meta encontrada com sucesso' })
   findOne(@Param('id') id: string) {
@@ -48,7 +50,7 @@ export class GoalsController {
   }
 
   @Patch(':id')
-  @Roles(CargoUsuario.PROFESSOR, CargoUsuario.ADMIN)
+  @Roles(CargoUsuario.ADMIN)
   @ApiOperation({ summary: 'Atualizar uma meta' })
   @ApiResponse({ status: 200, description: 'Meta atualizada com sucesso' })
   update(@Param('id') id: string, @Body() updateGoalDto: UpdateGoalDto) {
@@ -67,7 +69,7 @@ export class GoalsController {
   }
 
   @Delete(':id')
-  @Roles(CargoUsuario.ADMIN)
+  @Roles(CargoUsuario.PROFESSOR, CargoUsuario.ADMIN)
   @ApiOperation({ summary: 'Remover uma meta' })
   @ApiResponse({ status: 200, description: 'Meta removida com sucesso' })
   remove(@Param('id') id: string) {

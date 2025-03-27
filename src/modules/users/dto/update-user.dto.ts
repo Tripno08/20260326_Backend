@@ -1,6 +1,6 @@
 import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { CargoUsuario } from '@prisma/client';
+import { CargoUsuario } from '../../../shared/enums/cargo.enum';
 
 export class UpdateUserDto {
   @ApiProperty({ description: 'Email do usuário', required: false })

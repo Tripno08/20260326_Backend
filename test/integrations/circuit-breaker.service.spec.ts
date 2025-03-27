@@ -136,6 +136,33 @@ describe('CircuitBreakerService', () => {
       expect(status.successCount).toBe(0);
       expect(status.failureCount).toBe(1);
     });
+
+    it('should reset failure count after successful call', async () => {
+      // Arrange
+      const failOperation = async () => {
+        throw new Error('Test error');
+      };
+      
+      // Tentar uma operação que vai falhar
+      try {
+        await service.execute(failOperation, 'testService');
+      } catch (error) {
+        // Falha esperada
+      }
+      
+      // Estado inicial com erro
+      const initialStatus = await service.getCircuitStatus('testService');
+      expect(initialStatus.state).toBe('CLOSED');
+      
+      // Executar uma operação que vai ter sucesso
+      const successOperation = async () => 'success';
+      await service.execute(successOperation, 'testService');
+      
+      // Verificar que o contador de falhas foi resetado
+      const status = await service.getCircuitStatus('testService');
+      expect(status.state).toBe('CLOSED');
+      expect(status.failures).toBe(0);
+    });
   });
 
   describe('resetCircuit', () => {
@@ -155,7 +182,7 @@ describe('CircuitBreakerService', () => {
 
       const status = await service.getCircuitStatus('test-integration');
       expect(status.state).toBe('CLOSED');
-      expect(status.failureCount).toBe(0);
+      expect(status.failures).toBe(0);
     });
   });
 }); 

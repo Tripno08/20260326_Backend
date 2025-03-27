@@ -1,0 +1,42 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Criando uma aplicação Express simples
+RUN npm init -y && \
+    npm install express cors
+
+# Criando o arquivo do aplicativo
+COPY . .
+
+# Criando um aplicativo Express simples para o ambiente de homologação
+RUN echo 'const express = require("express"); \n\
+const cors = require("cors"); \n\
+const app = express(); \n\
+const PORT = process.env.PORT || 3000; \n\
+\n\
+app.use(cors()); \n\
+app.use(express.json()); \n\
+\n\
+app.get("/api/v1/health", (req, res) => { \n\
+  res.json({ status: "healthy", environment: "homologation", timestamp: new Date() }); \n\
+}); \n\
+\n\
+app.get("/api", (req, res) => { \n\
+  res.json({ \n\
+    name: "Innerview API", \n\
+    version: "1.0", \n\
+    environment: "homologation", \n\
+    endpoints: [ \n\
+      { path: "/api/v1/health", description: "Verificar saúde da API" } \n\
+    ] \n\
+  }); \n\
+}); \n\
+\n\
+app.listen(PORT, () => { \n\
+  console.log(`Servidor de homologação rodando na porta ${PORT}`); \n\
+});' > index.js
+
+EXPOSE 3000
+
+CMD ["node", "index.js"] 

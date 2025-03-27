@@ -1,74 +1,78 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
-import { CreateInsightDto } from './dto/create-insight.dto';
+import { CreateInsightDto, TipoInsight, NivelRisco } from './dto/create-insight.dto';
 import { UpdateInsightDto } from './dto/update-insight.dto';
-import { TipoInsight, NivelRisco } from './dto/create-insight.dto';
+import { FindInsightQueryDto } from './dto/find-insight-query.dto';
 
 @Injectable()
 export class InsightsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createInsightDto: CreateInsightDto) {
-    // Validar dados do insight
-    this.validateInsightData(createInsightDto);
-
-    return this.prisma.insight.create({
+    // Validar os dados
+    if (!createInsightDto.metricas || createInsightDto.metricas.length === 0) {
+      throw new BadRequestException('Deve haver pelo menos uma métrica');
+    }
+    
+    return this.prisma.customInsight.create({
       data: {
         ...createInsightDto,
-        metricas: createInsightDto.metricas ? JSON.stringify(createInsightDto.metricas) : null,
-        recomendacoes: createInsightDto.recomendacoes ? JSON.stringify(createInsightDto.recomendacoes) : null,
-        dadosAdicionais: createInsightDto.dadosAdicionais ? JSON.stringify(createInsightDto.dadosAdicionais) : null,
       },
     });
   }
 
-  async findAll(filtros?: {
-    tipo?: TipoInsight;
-    nivelRisco?: NivelRisco;
-    dataInicio?: Date;
-    dataFim?: Date;
-  }) {
-    return this.prisma.insight.findMany({
-      where: {
-        tipo: filtros?.tipo,
-        nivelRisco: filtros?.nivelRisco,
-        dataAnalise: {
-          gte: filtros?.dataInicio,
-          lte: filtros?.dataFim,
-        },
-      },
+  async findAll(query: FindInsightQueryDto) {
+    const { tipo, nivelRisco, de, ate } = query;
+    
+    const where: any = {};
+    
+    if (tipo) {
+      where.tipo = tipo;
+    }
+    
+    if (nivelRisco) {
+      where.nivelRisco = nivelRisco;
+    }
+    
+    if (de || ate) {
+      where.createdAt = {};
+      
+      if (de) {
+        where.createdAt.gte = new Date(de);
+      }
+      
+      if (ate) {
+        where.createdAt.lte = new Date(ate);
+      }
+    }
+
+    const insights = await this.prisma.customInsight.findMany({
+      where,
       orderBy: {
-        dataAnalise: 'desc',
+        createdAt: 'desc',
       },
     });
+    
+    return insights;
   }
 
   async findOne(id: string) {
-    const insight = await this.prisma.insight.findUnique({
+    const insight = await this.prisma.customInsight.findUnique({
       where: { id },
     });
-
+    
     if (!insight) {
       throw new NotFoundException(`Insight com ID ${id} não encontrado`);
     }
-
+    
     return insight;
   }
 
   async update(id: string, updateInsightDto: UpdateInsightDto) {
-    // Verificar se o insight existe
-    await this.findOne(id);
-
-    // Validar dados do insight
-    this.validateInsightData(updateInsightDto);
-
-    return this.prisma.insight.update({
+    return this.prisma.customInsight.update({
       where: { id },
       data: {
         ...updateInsightDto,
-        metricas: updateInsightDto.metricas ? JSON.stringify(updateInsightDto.metricas) : undefined,
-        recomendacoes: updateInsightDto.recomendacoes ? JSON.stringify(updateInsightDto.recomendacoes) : undefined,
-        dadosAdicionais: updateInsightDto.dadosAdicionais ? JSON.stringify(updateInsightDto.dadosAdicionais) : undefined,
       },
     });
   }
@@ -76,10 +80,19 @@ export class InsightsService {
   async remove(id: string) {
     // Verificar se o insight existe
     await this.findOne(id);
-
-    await this.prisma.insight.delete({
+    
+    await this.prisma.customInsight.delete({
       where: { id },
     });
+  }
+
+  // Função auxiliar para formatar os campos JSON
+  private formatInsight(insight: any) {
+    return {
+      ...insight,
+      metricas: typeof insight.metricas === 'string' ? JSON.parse(insight.metricas) : insight.metricas,
+      recomendacoes: typeof insight.recomendacoes === 'string' ? JSON.parse(insight.recomendacoes) : insight.recomendacoes,
+    };
   }
 
   async gerarInsightPredativo(estudanteId: string) {
