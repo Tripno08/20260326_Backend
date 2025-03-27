@@ -15,7 +15,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { RolesGuard } from '../../shared/guards/roles.guard';
 import { Roles } from '../../shared/decorators/roles.decorator';
-import { CargoUsuario } from '@prisma/client';
+import { CargoUsuario } from '../../shared/enums/cargo-usuario.enum';
 
 @ApiTags('institutions')
 @ApiBearerAuth()

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { InsightsService } from './insights.service';
 import { CreateInsightDto } from './dto/create-insight.dto';
 import { UpdateInsightDto } from './dto/update-insight.dto';
@@ -28,14 +28,18 @@ export class InsightsController {
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os insights' })
-  @ApiResponse({ status: 200, description: 'Lista de insights retornada com sucesso' })
+  @ApiResponse({ status: 200, description: 'Lista de insights retornada com sucesso.' })
+  @ApiQuery({ name: 'tipo', enum: TipoInsight, required: false })
+  @ApiQuery({ name: 'nivelRisco', enum: NivelRisco, required: false })
+  @ApiQuery({ name: 'de', required: false })
+  @ApiQuery({ name: 'ate', required: false })
   findAll(
     @Query('tipo') tipo?: TipoInsight,
     @Query('nivelRisco') nivelRisco?: NivelRisco,
-    @Query('dataInicio') dataInicio?: Date,
-    @Query('dataFim') dataFim?: Date,
+    @Query('de') de?: string,
+    @Query('ate') ate?: string,
   ) {
-    return this.insightsService.findAll({ tipo, nivelRisco, dataInicio, dataFim });
+    return this.insightsService.findAll({ tipo, nivelRisco, de, ate });
   }
 
   @Get(':id')

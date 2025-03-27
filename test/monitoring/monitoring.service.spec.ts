@@ -67,7 +67,7 @@ describe('IntegrationMonitorService', () => {
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
 
-      await prisma.integrationLog.create({
+      await prisma.customIntegrationLog.create({
         data: {
           integrationId,
           success: true,
@@ -75,7 +75,7 @@ describe('IntegrationMonitorService', () => {
         },
       });
 
-      await prisma.integrationLog.create({
+      await prisma.customIntegrationLog.create({
         data: {
           integrationId,
           success: false,
@@ -138,15 +138,27 @@ describe('IntegrationMonitorService', () => {
       // Create test integrations
       const integration1 = await prisma.integracaoPlataforma.create({
         data: {
-          nome: 'Test Integration 1',
+          nome: 'Integração Teste 1',
           ativo: true,
+          plataforma: 'GOOGLE_CLASSROOM',
+          clientId: 'client-id-1',
+          clientSecret: 'client-secret-1',
+          redirectUri: 'https://example.com/callback',
+          escopos: 'https://www.googleapis.com/auth/classroom.courses.readonly',
+          tenantId: null
         },
       });
 
       const integration2 = await prisma.integracaoPlataforma.create({
         data: {
-          nome: 'Test Integration 2',
+          nome: 'Integração Teste 2',
           ativo: true,
+          plataforma: 'MICROSOFT_TEAMS',
+          clientId: 'client-id-2',
+          clientSecret: 'client-secret-2',
+          redirectUri: 'https://example.com/callback-teams',
+          escopos: 'https://graph.microsoft.com/User.Read',
+          tenantId: 'tenant-id-2'
         },
       });
 

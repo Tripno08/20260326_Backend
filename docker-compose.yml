@@ -8,12 +8,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/innerview
-      - REDIS_HOST=redis
+      - DATABASE_URL=mysql://root:innerview@innerview-mysql:3306/innerview
+      - REDIS_HOST=innerview-redis
       - REDIS_PORT=6379
       - NODE_ENV=development
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -22,36 +22,37 @@ services:
       - /app/node_modules
     restart: unless-stopped
 
-  postgres:
-    image: postgis/postgis:14-3.3-alpine
-    ports:
-      - "5432:5432"
+  mysql:
+    image: mysql:8.0
+    container_name: innerview-mysql
+    restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=innerview
+      - MYSQL_ROOT_PASSWORD=innerview
+      - MYSQL_DATABASE=innerview
+    ports:
+      - '3306:3306'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pinnerview"]
+      interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
   redis:
     image: redis:alpine
+    container_name: innerview-redis
+    restart: always
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
 volumes:
-  postgres_data:
-  redis_data: 
+  redis_data:
+  mysql_data: 

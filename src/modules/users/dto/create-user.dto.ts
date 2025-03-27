@@ -1,6 +1,6 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength, IsOptional } from 'class-validator';
-import { CargoUsuario } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { CargoUsuario } from '../../../shared/enums/cargo.enum';
 
 export class CreateUserDto {
   @ApiProperty({

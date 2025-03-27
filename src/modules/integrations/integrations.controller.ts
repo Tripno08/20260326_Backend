@@ -16,7 +16,7 @@ import { UpdateIntegrationDto } from './dto/update-integration.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { CargoUsuario } from '@prisma/client';
+import { CargoUsuario } from '../../shared/enums/cargo-usuario.enum';
 
 @Controller('integrations')
 @ApiTags('Integrações')
@@ -41,7 +41,7 @@ export class IntegrationsController {
   @ApiResponse({ status: 403, description: 'Acesso negado' })
   @ApiQuery({ name: 'ativo', required: false, description: 'Filtrar por status da integração' })
   findAll(@Query('ativo') ativo?: boolean) {
-    return this.integrationsService.findAll({ ativo });
+    return this.integrationsService.findAll(ativo);
   }
 
   @Get(':id')
@@ -84,13 +84,11 @@ export class IntegrationsController {
     return this.integrationsService.authorize(id);
   }
 
-  @Post(':id/callback')
-  @ApiOperation({ summary: 'Processar callback de autorização da integração' })
-  @ApiResponse({ status: 200, description: 'Autorização processada com sucesso' })
+  @Get(':id/callback')
+  @ApiOperation({ summary: 'Processar callback de autorização' })
+  @ApiResponse({ status: 200, description: 'Callback processado com sucesso' })
   @ApiResponse({ status: 404, description: 'Integração não encontrada' })
-  @ApiResponse({ status: 400, description: 'Código de autorização inválido' })
-  @ApiResponse({ status: 403, description: 'Acesso negado' })
-  callback(@Param('id') id: string, @Body('code') code: string) {
+  callback(@Param('id') id: string, @Query('code') code: string) {
     return this.integrationsService.callback(id, code);
   }
 

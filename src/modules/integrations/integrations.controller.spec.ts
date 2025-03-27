@@ -68,28 +68,29 @@ describe('IntegrationsController', () => {
   });
 
   describe('findAll', () => {
-    it('should return all integrations', async () => {
+    it('should find all integrations with ativo filter', async () => {
       const expectedResult = [
         {
           id: 'test-id-1',
           nome: 'Integration 1',
           plataforma: Plataforma.GOOGLE_CLASSROOM,
           ativo: true,
-        },
-        {
-          id: 'test-id-2',
-          nome: 'Integration 2',
-          plataforma: Plataforma.MICROSOFT_TEAMS,
-          ativo: true,
+          clientId: 'client1',
+          clientSecret: 'secret1',
+          tenantId: null,
+          redirectUri: 'https://example.com/callback',
+          escopos: 'scope1 scope2',
+          criadoEm: new Date(),
+          atualizadoEm: new Date(),
         },
       ];
-
-      mockIntegrationsService.findAll.mockResolvedValue(expectedResult);
-
-      const result = await controller.findAll({ ativo: true });
-
+      
+      jest.spyOn(service, 'findAll').mockResolvedValue(expectedResult);
+      
+      const result = await controller.findAll(true);
+      
       expect(result).toEqual(expectedResult);
-      expect(mockIntegrationsService.findAll).toHaveBeenCalledWith({ ativo: true });
+      expect(service.findAll).toHaveBeenCalledWith(true);
     });
   });
 
@@ -173,18 +174,21 @@ describe('IntegrationsController', () => {
   });
 
   describe('callback', () => {
-    it('should process authorization callback', async () => {
-      const expectedResult = {
+    it('should handle OAuth callback', async () => {
+      const expectedResult = { 
         success: true,
-        message: 'Autorização processada com sucesso',
+        accessToken: 'access_token',
+        refreshToken: 'refresh_token',
+        expiresIn: 3600,
+        message: 'Callback processado com sucesso'
       };
-
-      mockIntegrationsService.callback.mockResolvedValue(expectedResult);
-
-      const result = await controller.callback('test-id', { code: 'test-code' });
-
+      
+      jest.spyOn(service, 'callback').mockResolvedValue(expectedResult);
+      
+      const result = await controller.callback('test-id', 'test-code');
+      
       expect(result).toEqual(expectedResult);
-      expect(mockIntegrationsService.callback).toHaveBeenCalledWith('test-id', 'test-code');
+      expect(service.callback).toHaveBeenCalledWith('test-id', 'test-code');
     });
   });
 

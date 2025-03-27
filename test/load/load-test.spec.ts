@@ -87,12 +87,13 @@ describe('Load Tests', () => {
     it('should handle database stress', async () => {
       const numOperations = 100;
       const operations = Array(numOperations).fill(null).map((_, i) => 
-        prisma.student.create({
+        prisma.estudante.create({
           data: {
-            name: `Test Student ${i}`,
-            email: `test${i}@example.com`,
-            institutionId: '123',
-            grade: '5º ano'
+            nome: `Test Student ${i}`,
+            serie: `${Math.floor(Math.random() * 12) + 1}`,
+            dataNascimento: new Date(),
+            usuarioId: '123',
+            instituicaoId: '123',
           }
         })
       );

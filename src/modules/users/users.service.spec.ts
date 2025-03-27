@@ -4,7 +4,7 @@ import { PrismaService } from '../../shared/prisma/prisma.service';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CargoUsuario } from '@prisma/client';
+import { CargoUsuario } from '../../shared/enums/cargo-usuario.enum';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -41,9 +41,9 @@ describe('UsersService', () => {
 
   describe('create', () => {
     const createUserDto: CreateUserDto = {
-      email: 'test@example.com',
-      senha: 'password123',
       nome: 'Test User',
+      email: 'test@example.com',
+      senha: 'Password123',
       cargo: CargoUsuario.PROFESSOR,
     };
 

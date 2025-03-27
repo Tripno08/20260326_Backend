@@ -12,7 +12,7 @@ export class IntegrationMonitorService {
   ) {}
 
   async logIntegrationAttempt(integrationId: string, success: boolean, error?: any) {
-    await this.prisma.integrationLog.create({
+    await this.prisma.customIntegrationLog.create({
       data: {
         integrationId,
         success,
@@ -27,7 +27,7 @@ export class IntegrationMonitorService {
   }
 
   async getIntegrationStatus(integrationId: string) {
-    const recentLogs = await this.prisma.integrationLog.findMany({
+    const recentLogs = await this.prisma.customIntegrationLog.findMany({
       where: {
         integrationId,
         timestamp: {
@@ -54,52 +54,90 @@ export class IntegrationMonitorService {
     };
   }
 
-  async getIntegrationMetrics(integrationId: string) {
-    const logs = await this.prisma.integrationLog.findMany({
+  async getRecentMetrics() {
+    // Obter logs das últimas 24 horas
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    
+    const recentLogs = await this.prisma.customIntegrationLog.findMany({
       where: {
-        integrationId,
         timestamp: {
-          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Últimos 7 dias
+          gte: oneDayAgo,
+        },
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+    });
+    
+    // Calcular as métricas
+    const successCount = recentLogs.filter(log => log.success).length;
+    const failureCount = recentLogs.length - successCount;
+    const successRate = recentLogs.length > 0 ? (successCount / recentLogs.length) * 100 : 0;
+    
+    return {
+      totalAttempts: recentLogs.length,
+      successCount,
+      failureCount,
+      successRate,
+      recentLogs,
+    };
+  }
+
+  async getHistoricalMetrics(days: number = 30) {
+    // Obter logs do período especificado
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    
+    const logs = await this.prisma.customIntegrationLog.findMany({
+      where: {
+        timestamp: {
+          gte: startDate,
         },
       },
       orderBy: {
         timestamp: 'asc',
       },
     });
-
-    // Agrupar por dia
+    
+    // Agrupar por dia e calcular métricas
     const dailyMetrics = logs.reduce((acc, log) => {
       const date = log.timestamp.toISOString().split('T')[0];
+      
       if (!acc[date]) {
         acc[date] = {
-          attempts: 0,
-          successes: 0,
-          failures: 0,
-          errors: [],
+          date,
+          totalAttempts: 0,
+          successCount: 0,
+          failureCount: 0,
+          successRate: 0,
         };
       }
-      acc[date].attempts++;
+      
+      acc[date].totalAttempts++;
       if (log.success) {
-        acc[date].successes++;
+        acc[date].successCount++;
       } else {
-        acc[date].failures++;
-        acc[date].errors.push(log.error);
+        acc[date].failureCount++;
       }
+      
+      acc[date].successRate = (acc[date].successCount / acc[date].totalAttempts) * 100;
+      
       return acc;
     }, {});
-
+    
     return {
-      dailyMetrics,
       totalAttempts: logs.length,
-      successRate: logs.length > 0 
-        ? (logs.filter(log => log.success).length / logs.length) * 100 
+      successRate: logs.length > 0
+        ? (logs.filter(log => log.success).length / logs.length) * 100
         : 0,
+      dailyMetrics: Object.values(dailyMetrics),
     };
   }
 
   async checkIntegrationHealth(integrationId: string) {
     const status = await this.getIntegrationStatus(integrationId);
-    const metrics = await this.getIntegrationMetrics(integrationId);
+    const metrics = await this.getHistoricalMetrics();
 
     const healthStatus = {
       status: status.successRate >= 95 ? 'healthy' : 

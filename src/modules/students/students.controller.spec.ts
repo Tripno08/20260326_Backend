@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { StudentsController } from './students.controller';
+import { EstudantesController } from './students.controller';
 import { StudentsService } from './students.service';
-import { CreateStudentDto } from './dto/create-student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
+import { CreateEstudanteDto } from './dto/create-student.dto';
+import { UpdateEstudanteDto } from './dto/update-student.dto';
 import { Role } from '../auth/enums/role.enum';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('StudentsController', () => {
-  let controller: StudentsController;
+  let controller: EstudantesController;
   let service: StudentsService;
 
   const mockStudentsService = {
@@ -16,14 +16,14 @@ describe('StudentsController', () => {
     findOne: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
-    findByUserId: jest.fn(),
-    findByInstitution: jest.fn(),
+    findByUsuario: jest.fn(),
+    findByInstituicao: jest.fn(),
     findBySerie: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [StudentsController],
+      controllers: [EstudantesController],
       providers: [
         {
           provide: StudentsService,
@@ -32,7 +32,7 @@ describe('StudentsController', () => {
       ],
     }).compile();
 
-    controller = module.get<StudentsController>(StudentsController);
+    controller = module.get<EstudantesController>(EstudantesController);
     service = module.get<StudentsService>(StudentsService);
   });
 
@@ -41,10 +41,10 @@ describe('StudentsController', () => {
   });
 
   describe('create', () => {
-    const createStudentDto: CreateStudentDto = {
+    const createStudentDto: CreateEstudanteDto = {
       nome: 'Test Student',
       serie: '1º Ano',
-      dataNascimento: '2010-01-01',
+      dataNascimento: new Date('2010-01-01'),
       usuarioId: 'user-1',
       instituicaoId: 'inst-1',
     };
@@ -119,9 +119,9 @@ describe('StudentsController', () => {
   });
 
   describe('update', () => {
-    const updateStudentDto: UpdateStudentDto = {
+    const updateStudentDto: UpdateEstudanteDto = {
       nome: 'Updated Name',
-      dataNascimento: '2010-01-01',
+      dataNascimento: new Date('2010-01-01'),
     };
 
     it('should update a student', async () => {
@@ -169,45 +169,45 @@ describe('StudentsController', () => {
     });
   });
 
-  describe('findByUserId', () => {
+  describe('findByUsuario', () => {
     it('should return students by user ID', async () => {
       const expectedResult = [
         { id: '1', nome: 'Student 1' },
         { id: '2', nome: 'Student 2' },
       ];
-      mockStudentsService.findByUserId.mockResolvedValue(expectedResult);
+      mockStudentsService.findByUsuario.mockResolvedValue(expectedResult);
 
-      const result = await controller.findByUserId('user-1');
+      const result = await controller.findByUsuario('user-1');
 
       expect(result).toEqual(expectedResult);
-      expect(mockStudentsService.findByUserId).toHaveBeenCalledWith('user-1');
+      expect(mockStudentsService.findByUsuario).toHaveBeenCalledWith('user-1');
     });
 
     it('should throw NotFoundException when user not found', async () => {
-      mockStudentsService.findByUserId.mockRejectedValue(new NotFoundException('Usuário não encontrado'));
+      mockStudentsService.findByUsuario.mockRejectedValue(new NotFoundException('Usuário não encontrado'));
 
-      await expect(controller.findByUserId('user-1')).rejects.toThrow(NotFoundException);
+      await expect(controller.findByUsuario('user-1')).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('findByInstitution', () => {
+  describe('findByInstituicao', () => {
     it('should return students by institution ID', async () => {
       const expectedResult = [
         { id: '1', nome: 'Student 1' },
         { id: '2', nome: 'Student 2' },
       ];
-      mockStudentsService.findByInstitution.mockResolvedValue(expectedResult);
+      mockStudentsService.findByInstituicao.mockResolvedValue(expectedResult);
 
-      const result = await controller.findByInstitution('inst-1');
+      const result = await controller.findByInstituicao('inst-1');
 
       expect(result).toEqual(expectedResult);
-      expect(mockStudentsService.findByInstitution).toHaveBeenCalledWith('inst-1');
+      expect(mockStudentsService.findByInstituicao).toHaveBeenCalledWith('inst-1');
     });
 
     it('should throw NotFoundException when institution not found', async () => {
-      mockStudentsService.findByInstitution.mockRejectedValue(new NotFoundException('Instituição não encontrada'));
+      mockStudentsService.findByInstituicao.mockRejectedValue(new NotFoundException('Instituição não encontrada'));
 
-      await expect(controller.findByInstitution('inst-1')).rejects.toThrow(NotFoundException);
+      await expect(controller.findByInstituicao('inst-1')).rejects.toThrow(NotFoundException);
     });
   });
 

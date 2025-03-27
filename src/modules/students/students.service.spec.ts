@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StudentsService } from './students.service';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { CreateStudentDto } from './dto/create-student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
+import { CreateEstudanteDto } from './dto/create-student.dto';
+import { UpdateEstudanteDto } from './dto/update-student.dto';
 import { Estudante } from '@prisma/client';
 
 describe('StudentsService', () => {
@@ -46,27 +46,27 @@ describe('StudentsService', () => {
   });
 
   describe('create', () => {
-    const createStudentDto: CreateStudentDto = {
-      nome: 'Test Student',
-      serie: '1º Ano',
-      dataNascimento: '2010-01-01',
-      usuarioId: 'user-1',
-      instituicaoId: 'inst-1',
+    const createEstudanteDto = {
+      nome: 'Nome do Estudante',
+      serie: '5ª Série',
+      dataNascimento: new Date('2010-01-01'),
+      usuarioId: 'user-id-1',
+      instituicaoId: 'instituicao-id-1',
     };
 
     it('should create a student successfully', async () => {
       mockPrismaService.usuario.findUnique.mockResolvedValue({ id: 'user-1' });
       mockPrismaService.instituicao.findUnique.mockResolvedValue({ id: 'inst-1' });
-      mockPrismaService.estudante.create.mockResolvedValue({ id: 'student-1', ...createStudentDto });
+      mockPrismaService.estudante.create.mockResolvedValue({ id: 'student-1', ...createEstudanteDto });
 
-      const result = await service.create(createStudentDto);
+      const result = await service.create(createEstudanteDto);
 
       expect(result).toHaveProperty('id');
-      expect(result.nome).toBe(createStudentDto.nome);
+      expect(result.nome).toBe(createEstudanteDto.nome);
       expect(mockPrismaService.estudante.create).toHaveBeenCalledWith({
         data: {
-          ...createStudentDto,
-          dataNascimento: new Date(createStudentDto.dataNascimento),
+          ...createEstudanteDto,
+          dataNascimento: new Date(createEstudanteDto.dataNascimento),
         },
         include: {
           usuario: true,
@@ -78,18 +78,23 @@ describe('StudentsService', () => {
     it('should throw NotFoundException if user not found', async () => {
       mockPrismaService.usuario.findUnique.mockResolvedValue(null);
 
-      await expect(service.create(createStudentDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createEstudanteDto)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException if institution not found', async () => {
       mockPrismaService.usuario.findUnique.mockResolvedValue({ id: 'user-1' });
       mockPrismaService.instituicao.findUnique.mockResolvedValue(null);
 
-      await expect(service.create(createStudentDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createEstudanteDto)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if dataNascimento is invalid', async () => {
-      const invalidDto = { ...createStudentDto, dataNascimento: 'invalid-date' };
+      const invalidDto = {
+        nome: 'Nome do Estudante',
+        serie: '5ª Série',
+        dataNascimento: new Date('2010-01-01'),
+        usuarioId: 'user-id-1',
+      };
 
       await expect(service.create(invalidDto)).rejects.toThrow(BadRequestException);
     });
@@ -152,26 +157,26 @@ describe('StudentsService', () => {
   });
 
   describe('update', () => {
-    const updateStudentDto: UpdateStudentDto = {
-      nome: 'Updated Name',
-      instituicaoId: 'inst-2',
-      dataNascimento: '2010-01-01',
+    const updateEstudanteDto = {
+      nome: 'Nome Atualizado',
+      serie: '6ª Série',
+      dataNascimento: new Date('2010-01-01'),
     };
 
     it('should update a student successfully', async () => {
       const existingStudent = { id: '1', nome: 'Test Student' };
       mockPrismaService.estudante.findUnique.mockResolvedValue(existingStudent);
       mockPrismaService.instituicao.findUnique.mockResolvedValue({ id: 'inst-2' });
-      mockPrismaService.estudante.update.mockResolvedValue({ ...existingStudent, ...updateStudentDto });
+      mockPrismaService.estudante.update.mockResolvedValue({ ...existingStudent, ...updateEstudanteDto });
 
-      const result = await service.update('1', updateStudentDto);
+      const result = await service.update('1', updateEstudanteDto);
 
-      expect(result.nome).toBe(updateStudentDto.nome);
+      expect(result.nome).toBe(updateEstudanteDto.nome);
       expect(mockPrismaService.estudante.update).toHaveBeenCalledWith({
         where: { id: '1' },
         data: {
-          ...updateStudentDto,
-          dataNascimento: new Date(updateStudentDto.dataNascimento),
+          ...updateEstudanteDto,
+          dataNascimento: new Date(updateEstudanteDto.dataNascimento),
         },
         include: {
           usuario: true,
@@ -185,21 +190,24 @@ describe('StudentsService', () => {
     it('should throw NotFoundException if student not found', async () => {
       mockPrismaService.estudante.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('1', updateStudentDto)).rejects.toThrow(NotFoundException);
+      await expect(service.update('1', updateEstudanteDto)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException if institution not found', async () => {
       mockPrismaService.estudante.findUnique.mockResolvedValue({ id: '1' });
       mockPrismaService.instituicao.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('1', updateStudentDto)).rejects.toThrow(NotFoundException);
+      await expect(service.update('1', updateEstudanteDto)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if dataNascimento is invalid', async () => {
-      const invalidDto = { ...updateStudentDto, dataNascimento: 'invalid-date' };
+      const invalidUpdateDto = {
+        nome: 'Nome Inválido',
+        dataNascimento: new Date('2010-01-01'),
+      };
       mockPrismaService.estudante.findUnique.mockResolvedValue({ id: '1' });
 
-      await expect(service.update('1', invalidDto)).rejects.toThrow(BadRequestException);
+      await expect(service.update('1', invalidUpdateDto)).rejects.toThrow(BadRequestException);
     });
   });
 

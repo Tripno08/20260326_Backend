@@ -1,14 +1,15 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { RedisService } from '../src/shared/cache/redis.service';
+import { RedisService } from '../src/shared/redis/redis.service';
 
 describe('Rate Limiting', () => {
   let app: INestApplication;
   let redisService: RedisService;
 
-  beforeAll(async () => {
-    const moduleFixture = await Test.createTestingModule({
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 

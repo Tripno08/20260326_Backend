@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { Estudante } from '@prisma/client';
-import { CreateStudentDto } from './dto/create-student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
+import { CreateEstudanteDto } from './dto/create-student.dto';
+import { UpdateEstudanteDto } from './dto/update-student.dto';
 
 @Injectable()
 export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createStudentDto: CreateStudentDto): Promise<Estudante> {
+  async create(createStudentDto: CreateEstudanteDto): Promise<Estudante> {
     // Validar a data de nascimento
     const dataNascimento = new Date(createStudentDto.dataNascimento);
     if (isNaN(dataNascimento.getTime())) {
@@ -106,7 +106,7 @@ export class StudentsService {
     return estudante;
   }
 
-  async update(id: string, updateStudentDto: UpdateStudentDto): Promise<Estudante> {
+  async update(id: string, updateStudentDto: UpdateEstudanteDto): Promise<Estudante> {
     // Verificar se o estudante existe
     await this.findOne(id);
 
@@ -169,6 +169,51 @@ export class StudentsService {
     });
   }
 
+  async findByUsuario(usuarioId: string): Promise<Estudante[]> {
+    return this.prisma.estudante.findMany({
+      where: { usuarioId },
+      include: {
+        usuario: true,
+        Instituicao: true,
+        avaliacoes: true,
+        intervencoes: true,
+      },
+      orderBy: {
+        nome: 'asc',
+      },
+    });
+  }
+
+  async findByInstituicao(instituicaoId: string): Promise<Estudante[]> {
+    return this.prisma.estudante.findMany({
+      where: { instituicaoId },
+      include: {
+        usuario: true,
+        Instituicao: true,
+        avaliacoes: true,
+        intervencoes: true,
+      },
+      orderBy: {
+        nome: 'asc',
+      },
+    });
+  }
+
+  async findBySerie(serie: string): Promise<Estudante[]> {
+    return this.prisma.estudante.findMany({
+      where: { serie },
+      include: {
+        usuario: true,
+        Instituicao: true,
+        avaliacoes: true,
+        intervencoes: true,
+      },
+      orderBy: {
+        nome: 'asc',
+      },
+    });
+  }
+
   async findByUserId(usuarioId: string): Promise<Estudante[]> {
     return this.prisma.estudante.findMany({
       where: { usuarioId },
@@ -187,21 +232,6 @@ export class StudentsService {
   async findByInstitution(instituicaoId: string): Promise<Estudante[]> {
     return this.prisma.estudante.findMany({
       where: { instituicaoId },
-      include: {
-        usuario: true,
-        Instituicao: true,
-        avaliacoes: true,
-        intervencoes: true,
-      },
-      orderBy: {
-        nome: 'asc',
-      },
-    });
-  }
-
-  async findBySerie(serie: string): Promise<Estudante[]> {
-    return this.prisma.estudante.findMany({
-      where: { serie },
       include: {
         usuario: true,
         Instituicao: true,

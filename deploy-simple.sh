@@ -103,14 +103,14 @@ fi
 # Criar arquivo de ambiente
 echo "Configurando variáveis de ambiente..."
 cat > .env << EOF
-DATABASE_URL="postgresql://postgres:postgres@postgres:5432/innerview?schema=public"
-JWT_SECRET="homolog-secure-key-$(date +%s%N | sha256sum | head -c 16)"
-JWT_EXPIRES_IN="1d"
+DATABASE_URL="mysql://root:Innerview@2024#Prod@mysql:3306/innerview"
+JWT_SECRET="Innerview@2024#JWT#Secret#Prod"
+JWT_EXPIRES_IN="24h"
 PORT=3000
 NODE_ENV="production"
 REDIS_HOST="redis"
 REDIS_PORT=6379
-REDIS_PASSWORD=""
+REDIS_PASSWORD="Innerview@2024#Redis#Prod"
 REDIS_TTL=3600
 EOF
 

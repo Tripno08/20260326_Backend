@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
-import { Usuario, CargoUsuario } from '@prisma/client';
+import { Usuario } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { CargoUsuario } from '../../shared/enums/cargo-usuario.enum';
 
 @Injectable()
 export class UsersService {
@@ -31,11 +32,11 @@ export class UsersService {
     });
   }
 
-  async findAll(cargo?: CargoUsuario, search?: string): Promise<Usuario[]> {
-    const where: any = {};
+  async findAll(cargo?: CargoUsuario, search?: string): Promise<Partial<Usuario>[]> {
+    const where: Record<string, any> = {};
 
     if (cargo) {
-      where.cargo = cargo;
+      where.cargo = cargo.toString();
     }
 
     if (search) {
@@ -47,8 +48,13 @@ export class UsersService {
 
     return this.prisma.usuario.findMany({
       where,
-      orderBy: {
-        nome: 'asc',
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        cargo: true,
+        criadoEm: true,
+        atualizadoEm: true,
       },
     });
   }

@@ -3,7 +3,7 @@ import * as request from 'supertest';
 import { app } from './setup';
 import { PrismaService } from '../src/shared/prisma/prisma.service';
 import { CargoUsuario } from '@prisma/client';
-import { RedisService } from '../src/shared/cache/redis.service';
+import { RedisService } from '../src/shared/redis/redis.service';
 
 describe('CacheController (e2e)', () => {
   let prisma: PrismaService;

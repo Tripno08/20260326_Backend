@@ -1,8 +1,10 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { MfaService } from '../src/shared/auth/mfa.service';
-import { RedisService } from '../src/shared/cache/redis.service';
+import { RedisService } from '../src/shared/redis/redis.service';
+import { authenticator } from 'otplib';
 
 describe('Autenticação Multi-Fator', () => {
   let app: INestApplication;
@@ -10,7 +12,7 @@ describe('Autenticação Multi-Fator', () => {
   let redisService: RedisService;
 
   beforeAll(async () => {
-    const moduleFixture = await Test.createTestingModule({
+    const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 

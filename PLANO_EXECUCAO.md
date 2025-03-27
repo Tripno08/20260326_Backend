@@ -201,7 +201,7 @@ src/
   - ✅ Módulo de Integrações
   - ✅ Módulo de Insights
 - 🧪 **Testes:** 100%
-  - ✅ Testes unitários
+    - ✅ Testes unitários
   - ✅ Testes de integração
   - ✅ Testes de performance
   - ✅ Testes de segurança

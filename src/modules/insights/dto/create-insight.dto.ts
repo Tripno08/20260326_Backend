@@ -3,112 +3,96 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum TipoInsight {
-  PREDITIVO = 'PREDITIVO',
+  ACADEMICO = 'ACADEMICO',
+  COMPORTAMENTAL = 'COMPORTAMENTAL',
+  PSICOLOGICO = 'PSICOLOGICO',
+  FINANCEIRO = 'FINANCEIRO',
   DESCRITIVO = 'DESCRITIVO',
-  PRESCRITIVO = 'PRESCRITIVO'
+  PREDITIVO = 'PREDITIVO',
 }
 
 export enum NivelRisco {
   BAIXO = 'BAIXO',
-  MODERADO = 'MODERADO',
+  MEDIO = 'MEDIO',
   ALTO = 'ALTO',
-  MUITO_ALTO = 'MUITO_ALTO'
+  CRITICO = 'CRITICO',
+  MUITO_ALTO = 'MUITO_ALTO',
+  MODERADO = 'MODERADO',
 }
 
-class MetricaInsightDto {
-  @ApiProperty({ description: 'Nome da métrica' })
-  @IsString()
-  @IsNotEmpty()
+export class MetricaInsightDto {
+  @ApiProperty({ description: 'Nome da métrica', example: 'Taxa de Absenteísmo' })
+  @IsNotEmpty({ message: 'O nome da métrica é obrigatório' })
+  @IsString({ message: 'O nome da métrica deve ser uma string' })
   nome: string;
 
-  @ApiProperty({ description: 'Valor da métrica' })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Valor da métrica', example: '15' })
+  @IsNotEmpty({ message: 'O valor da métrica é obrigatório' })
+  @IsString({ message: 'O valor da métrica deve ser uma string' })
   valor: string;
 
-  @ApiProperty({ description: 'Unidade de medida da métrica' })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Unidade da métrica', example: '%' })
+  @IsNotEmpty({ message: 'A unidade da métrica é obrigatória' })
+  @IsString({ message: 'A unidade da métrica deve ser uma string' })
   unidade: string;
 }
 
-class RecomendacaoInsightDto {
-  @ApiProperty({ description: 'Descrição da recomendação' })
-  @IsString()
-  @IsNotEmpty()
+export class RecomendacaoInsightDto {
+  @ApiProperty({ description: 'Descrição da recomendação', example: 'Realizar intervenção pedagógica com foco em matemática' })
+  @IsNotEmpty({ message: 'A descrição é obrigatória' })
+  @IsString({ message: 'A descrição deve ser uma string' })
   descricao: string;
 
-  @ApiProperty({ description: 'Prioridade da recomendação (1-5)', minimum: 1, maximum: 5 })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Prioridade da recomendação', example: 'Alta' })
+  @IsNotEmpty({ message: 'A prioridade é obrigatória' })
+  @IsString({ message: 'A prioridade deve ser uma string' })
   prioridade: string;
 
-  @ApiProperty({ description: 'Impacto esperado da recomendação' })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Impacto esperado da recomendação', example: 'Melhora no desempenho acadêmico' })
+  @IsNotEmpty({ message: 'O impacto é obrigatório' })
+  @IsString({ message: 'O impacto deve ser uma string' })
   impacto: string;
 }
 
 export class CreateInsightDto {
-  @ApiProperty({
-    description: 'Título do insight',
-    example: 'Análise de Risco Acadêmico',
-    minLength: 3,
-    maxLength: 100
-  })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Título do insight', example: 'Queda no desempenho acadêmico' })
+  @IsNotEmpty({ message: 'O título é obrigatório' })
+  @IsString({ message: 'O título deve ser uma string' })
   titulo: string;
 
-  @ApiProperty({
-    description: 'Descrição detalhada do insight',
-    example: 'Análise preditiva do risco de evasão escolar baseada em métricas históricas',
-    required: false
-  })
-  @IsString()
-  @IsOptional()
-  descricao?: string;
+  @ApiProperty({ description: 'Descrição do insight', example: 'Queda significativa no desempenho acadêmico nas últimas avaliações' })
+  @IsNotEmpty({ message: 'A descrição é obrigatória' })
+  @IsString({ message: 'A descrição deve ser uma string' })
+  descricao: string;
 
-  @ApiProperty({
-    description: 'Tipo do insight',
-    enum: TipoInsight,
-    example: TipoInsight.PREDITIVO
-  })
-  @IsEnum(TipoInsight)
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Tipo do insight', enum: TipoInsight, example: TipoInsight.ACADEMICO })
+  @IsEnum(TipoInsight, { message: 'O tipo do insight deve ser válido' })
+  @IsNotEmpty({ message: 'O tipo do insight é obrigatório' })
   tipo: TipoInsight;
 
-  @ApiProperty({
-    description: 'Nível de risco identificado',
-    enum: NivelRisco,
-    example: NivelRisco.MODERADO,
-    required: false
-  })
-  @IsEnum(NivelRisco)
-  @IsOptional()
-  nivelRisco?: NivelRisco;
+  @ApiProperty({ description: 'Nível de risco do insight', enum: NivelRisco, example: NivelRisco.MEDIO })
+  @IsEnum(NivelRisco, { message: 'O nível de risco deve ser válido' })
+  @IsNotEmpty({ message: 'O nível de risco é obrigatório' })
+  nivelRisco: NivelRisco;
 
-  @ApiProperty({
-    description: 'Métricas associadas ao insight',
-    type: [MetricaInsightDto],
-    required: false
-  })
-  @IsArray()
+  @ApiProperty({ description: 'Métricas relacionadas ao insight', type: [MetricaInsightDto] })
+  @IsArray({ message: 'As métricas devem ser um array' })
   @ValidateNested({ each: true })
   @Type(() => MetricaInsightDto)
-  @IsOptional()
-  metricas?: MetricaInsightDto[];
+  @IsNotEmpty({ message: 'Deve haver pelo menos uma métrica' })
+  metricas: MetricaInsightDto[];
 
-  @ApiProperty({
-    description: 'Recomendações baseadas no insight',
-    type: [RecomendacaoInsightDto],
-    required: false
-  })
-  @IsArray()
+  @ApiProperty({ description: 'Recomendações para o insight', type: [RecomendacaoInsightDto] })
+  @IsArray({ message: 'As recomendações devem ser um array' })
   @ValidateNested({ each: true })
   @Type(() => RecomendacaoInsightDto)
+  @IsNotEmpty({ message: 'Deve haver pelo menos uma recomendação' })
+  recomendacoes: RecomendacaoInsightDto[];
+
+  @ApiProperty({ description: 'ID do estudante relacionado ao insight', example: 'uuid-do-estudante', required: false })
   @IsOptional()
-  recomendacoes?: RecomendacaoInsightDto[];
+  @IsString({ message: 'O ID do estudante deve ser uma string' })
+  estudanteId?: string;
 
   @ApiProperty({
     description: 'Dados adicionais específicos do insight',

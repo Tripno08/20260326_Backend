@@ -3,7 +3,21 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuditService } from './audit.service';
-import { AUDIT_KEY, Audit } from './audit.decorator';
+
+// Constante para a chave de metadados de auditoria
+export const AUDIT_KEY = 'audit';
+
+// Interface para as opções de auditoria
+export interface AuditOptions {
+  entidade: string;
+  acao: string;
+  // Se o ID da entidade deve ser extraído automaticamente dos parâmetros ou do resultado
+  extrairIdEntidade?: boolean | string;
+  // Se os detalhes da auditoria devem incluir os parâmetros da requisição
+  incluirParametros?: boolean;
+  // Se os detalhes da auditoria devem incluir o resultado da operação
+  incluirResultado?: boolean;
+}
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
@@ -30,13 +44,12 @@ export class AuditInterceptor implements NestInterceptor {
         const entidadeId = this.getEntidadeId(request, result);
         const detalhes = this.getDetalhes(request, result);
 
-        await this.auditService.registrar(
-          user.id,
+        await this.auditService.registrarAcao(
+          request?.user?.id || 'system',
           acao,
           entidade,
           entidadeId,
           detalhes,
-          request,
         );
       }),
     );

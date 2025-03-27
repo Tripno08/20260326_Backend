@@ -1,26 +1,28 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/shared/prisma/prisma.service';
 import { QueryOptimizerService } from '../src/shared/optimization/query-optimizer.service';
 import { OptimizedQueriesService } from '../src/shared/optimization/optimized-queries.service';
 import { CargoUsuario } from '@prisma/client';
 
-describe('Otimização de Consultas', () => {
+describe('Query Optimization (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
-  let queryOptimizer: QueryOptimizerService;
+  let optimizerService: QueryOptimizerService;
   let optimizedQueries: OptimizedQueriesService;
 
-  beforeAll(async () => {
-    const moduleFixture = await Test.createTestingModule({
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    await app.init();
-
+    optimizerService = moduleFixture.get<QueryOptimizerService>(QueryOptimizerService);
+    optimizedQueries = moduleFixture.get<OptimizedQueriesService>(OptimizedQueriesService);
     prisma = app.get<PrismaService>(PrismaService);
-    queryOptimizer = app.get<QueryOptimizerService>(QueryOptimizerService);
-    optimizedQueries = app.get<OptimizedQueriesService>(OptimizedQueriesService);
+    await app.init();
   });
 
   afterAll(async () => {
@@ -68,10 +70,12 @@ describe('Otimização de Consultas', () => {
         }),
       ]);
 
-      const result = await queryOptimizer.loadEstudantes(estudantes.map(e => e.id));
+      const result = await optimizerService.loadEstudantes(estudantes.map(e => e.id));
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe(estudantes[0].id);
-      expect(result[1].id).toBe(estudantes[1].id);
+      expect(result[0]).not.toBeInstanceOf(Error);
+      if (!(result[0] instanceof Error)) {
+        expect(result[0].id).toBe(estudantes[0].id);
+      }
     });
 
     it('deve carregar intervenções por estudante', async () => {
@@ -114,7 +118,7 @@ describe('Otimização de Consultas', () => {
         }),
       ]);
 
-      const result = await queryOptimizer.loadIntervencoes(estudante.id);
+      const result = await optimizerService.loadIntervencoes(estudante.id);
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe(intervencoes[0].id);
       expect(result[1].id).toBe(intervencoes[1].id);

@@ -11,27 +11,27 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { StudentsService } from './students.service';
-import { CreateStudentDto } from './dto/create-student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { CargoUsuario } from '@prisma/client';
+import { CreateEstudanteDto } from './dto/create-student.dto';
+import { UpdateEstudanteDto } from './dto/update-student.dto';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
+import { RolesGuard } from '../../shared/guards/roles.guard';
+import { Roles } from '../../shared/decorators/roles.decorator';
+import { CargoUsuario } from '../../shared/enums/cargo-usuario.enum';
 
 @ApiTags('Estudantes')
-@ApiBearerAuth()
+@Controller('estudantes')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('students')
-export class StudentsController {
+@ApiBearerAuth()
+export class EstudantesController {
   constructor(private readonly studentsService: StudentsService) {}
 
   @Post()
-  @Roles(CargoUsuario.ADMIN)
+  @Roles(CargoUsuario.ADMIN, CargoUsuario.PROFESSOR)
   @ApiOperation({ summary: 'Criar um novo estudante' })
   @ApiResponse({ status: 201, description: 'Estudante criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 403, description: 'Acesso negado' })
-  create(@Body() createStudentDto: CreateStudentDto) {
+  create(@Body() createStudentDto: CreateEstudanteDto) {
     return this.studentsService.create(createStudentDto);
   }
 
@@ -39,6 +39,9 @@ export class StudentsController {
   @ApiOperation({ summary: 'Listar todos os estudantes' })
   @ApiResponse({ status: 200, description: 'Lista de estudantes retornada com sucesso' })
   @ApiResponse({ status: 403, description: 'Acesso negado' })
+  @ApiQuery({ name: 'serie', required: false })
+  @ApiQuery({ name: 'instituicaoId', required: false })
+  @ApiQuery({ name: 'search', required: false })
   findAll(
     @Query('serie') serie?: string,
     @Query('instituicaoId') instituicaoId?: string,
@@ -57,13 +60,13 @@ export class StudentsController {
   }
 
   @Patch(':id')
-  @Roles(CargoUsuario.ADMIN)
+  @Roles(CargoUsuario.ADMIN, CargoUsuario.PROFESSOR)
   @ApiOperation({ summary: 'Atualizar um estudante' })
   @ApiResponse({ status: 200, description: 'Estudante atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Estudante não encontrado' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 403, description: 'Acesso negado' })
-  update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
+  update(@Param('id') id: string, @Body() updateStudentDto: UpdateEstudanteDto) {
     return this.studentsService.update(id, updateStudentDto);
   }
 
@@ -81,16 +84,16 @@ export class StudentsController {
   @ApiOperation({ summary: 'Buscar estudantes por ID do usuário' })
   @ApiResponse({ status: 200, description: 'Lista de estudantes retornada com sucesso.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
-  findByUserId(@Param('usuarioId') usuarioId: string) {
-    return this.studentsService.findByUserId(usuarioId);
+  findByUsuario(@Param('usuarioId') usuarioId: string) {
+    return this.studentsService.findByUsuario(usuarioId);
   }
 
   @Get('institution/:instituicaoId')
   @ApiOperation({ summary: 'Buscar estudantes por ID da instituição' })
   @ApiResponse({ status: 200, description: 'Lista de estudantes retornada com sucesso.' })
   @ApiResponse({ status: 404, description: 'Instituição não encontrada.' })
-  findByInstitution(@Param('instituicaoId') instituicaoId: string) {
-    return this.studentsService.findByInstitution(instituicaoId);
+  findByInstituicao(@Param('instituicaoId') instituicaoId: string) {
+    return this.studentsService.findByInstituicao(instituicaoId);
   }
 
   @Get('serie/:serie')

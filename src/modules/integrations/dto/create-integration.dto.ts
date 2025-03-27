@@ -1,14 +1,14 @@
-import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsEnum } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, IsEnum, IsObject, ValidateIf } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Plataforma } from '@prisma/client';
 
 export class CreateIntegrationDto {
   @ApiProperty({
     description: 'Nome da integração',
-    example: 'Google Classroom - Escola XYZ'
+    example: 'Google Classroom Instituidção X'
   })
-  @IsString({ message: 'O nome deve ser uma string' })
   @IsNotEmpty({ message: 'O nome é obrigatório' })
+  @IsString({ message: 'O nome deve ser uma string' })
   nome: string;
 
   @ApiProperty({
@@ -16,58 +16,81 @@ export class CreateIntegrationDto {
     enum: Plataforma,
     example: Plataforma.GOOGLE_CLASSROOM
   })
-  @IsEnum(Plataforma, { message: 'Plataforma inválida' })
+  @IsEnum(Plataforma, { message: 'A plataforma deve ser um valor válido' })
   @IsNotEmpty({ message: 'A plataforma é obrigatória' })
   plataforma: Plataforma;
 
   @ApiProperty({
-    description: 'Client ID da integração',
-    example: '123456789-abcdef.apps.googleusercontent.com'
+    description: 'Client ID para autenticação OAuth',
+    example: 'client_id_example'
   })
-  @IsString({ message: 'O client ID deve ser uma string' })
-  @IsNotEmpty({ message: 'O client ID é obrigatório' })
+  @IsNotEmpty({ message: 'O ID do cliente é obrigatório' })
+  @IsString({ message: 'O ID do cliente deve ser uma string' })
   clientId: string;
 
   @ApiProperty({
-    description: 'Client Secret da integração',
-    example: 'GOCSPX-abcdef1234567890'
+    description: 'Client Secret para autenticação OAuth',
+    example: 'client_secret_example'
   })
-  @IsString({ message: 'O client secret deve ser uma string' })
-  @IsNotEmpty({ message: 'O client secret é obrigatório' })
+  @IsNotEmpty({ message: 'O segredo do cliente é obrigatório' })
+  @IsString({ message: 'O segredo do cliente deve ser uma string' })
   clientSecret: string;
 
-  @ApiProperty({
-    description: 'Tenant ID (apenas para Microsoft)',
-    example: '12345678-1234-1234-1234-123456789012',
-    required: false
+  @ApiPropertyOptional({
+    description: 'Tenant ID para plataformas que necessitam',
+    example: 'tenant_id_example'
   })
-  @IsString({ message: 'O tenant ID deve ser uma string' })
   @IsOptional()
+  @IsString({ message: 'O ID do tenant deve ser uma string' })
   tenantId?: string;
 
   @ApiProperty({
-    description: 'URL de redirecionamento após autenticação',
-    example: 'https://api.innerview.com.br/auth/callback'
+    description: 'URI de redirecionamento para autenticação OAuth',
+    example: 'https://app.example.com/callback'
   })
-  @IsString({ message: 'A URL de redirecionamento deve ser uma string' })
-  @IsNotEmpty({ message: 'A URL de redirecionamento é obrigatória' })
+  @IsNotEmpty({ message: 'A URI de redirecionamento é obrigatória' })
+  @IsString({ message: 'A URI de redirecionamento deve ser uma string' })
   redirectUri: string;
 
   @ApiProperty({
-    description: 'Escopos necessários para a integração',
-    example: 'https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.rosters.readonly'
+    description: 'Escopos de permissão para autenticação OAuth',
+    example: 'profile email'
   })
-  @IsString({ message: 'Os escopos devem ser uma string' })
   @IsNotEmpty({ message: 'Os escopos são obrigatórios' })
+  @IsString({ message: 'Os escopos devem ser uma string' })
   escopos: string;
 
-  @ApiProperty({
-    description: 'Indica se a integração está ativa',
-    example: true,
-    default: true,
-    required: false
+  @ApiPropertyOptional({
+    description: 'Status da integração',
+    default: true
   })
-  @IsBoolean({ message: 'O status deve ser um booleano' })
   @IsOptional()
+  @IsBoolean({ message: 'O status deve ser um booleano' })
   ativo?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Configurações específicas para LTI',
+    type: 'object'
+  })
+  @IsOptional()
+  @IsObject({ message: 'As configurações LTI devem ser um objeto' })
+  @ValidateIf(o => o.plataforma === Plataforma.LTI)
+  configuracaoLti?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Configurações específicas para OAuth',
+    type: 'object'
+  })
+  @IsOptional()
+  @IsObject({ message: 'As configurações OAuth devem ser um objeto' })
+  @ValidateIf(o => [Plataforma.GOOGLE_CLASSROOM, Plataforma.MICROSOFT_TEAMS].includes(o.plataforma))
+  configuracaoOAuth?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Configurações adicionais',
+    type: 'object'
+  })
+  @IsOptional()
+  @IsObject({ message: 'As configurações adicionais devem ser um objeto' })
+  configuracaoAdicional?: Record<string, any>;
 } 
